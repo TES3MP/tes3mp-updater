@@ -5,18 +5,15 @@
 #include "FileDownloader.hpp"
 
 #include <iostream>
+#include <iomanip>
 
 #include <boost/beast/http/empty_body.hpp>
 #include <boost/beast/http/read.hpp>
 #include <boost/beast/http/write.hpp>
 #include <boost/asio/ip/tcp.hpp>
-
-#include <network/uri/uri.hpp>
-#include <boost/beast.hpp>
 #include <boost/asio/connect.hpp>
-#include <iomanip>
-
 #include <boost/iostreams/device/back_inserter.hpp>
+#include <boost/beast/version.hpp>
 
 #include "URI.hpp"
 
