@@ -2,8 +2,7 @@
 // Created by koncord on 06.01.18.
 //
 
-#ifndef FILEDOWNLOADER_DOWNLOADER_HPP
-#define FILEDOWNLOADER_DOWNLOADER_HPP
+#pragma once
 
 #include <future>
 #include <string>
@@ -87,5 +86,3 @@ private:
     void on_read(boost::system::error_code &ec, std::size_t bytes_transferred);
     void on_done(boost::system::error_code &ec);
 };
-
-#endif //FILEDOWNLOADER_DOWNLOADER_HPP
