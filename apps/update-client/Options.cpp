@@ -19,7 +19,7 @@ bool Options::parseOptions(int argc, char **argv, Options &options)
              "connect to download server (e.g. --connect=127.0.0.1:25560)")
             ("server", bpo::value<std::string>(),
              "address of the game server (used to linking data) (e.g. --server=127.0.0.1:25565)")
-            ("path", bpo::value<std::string>()->required(), "path to the directory with cache")
+            ("path", bpo::value<std::string>(), "path to the directory with cache")
             ("clean", bpo::value<std::string>()->implicit_value(""), "removes unused files and empty directories");
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
@@ -31,9 +31,16 @@ bool Options::parseOptions(int argc, char **argv, Options &options)
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
 
+
     if (variables.count("help"))
     {
         std::cout << desc << std::endl;
+        return false;
+    }
+
+    if (variables.count("path"))
+    {
+        std::cerr << "the option '--path' is required but missing" << std::endl;
         return false;
     }
 
