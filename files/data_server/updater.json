@@ -1,0 +1,7 @@
+{
+  "dataPath": "",
+  "address": "0.0.0.0",
+  "maxThreads": 2,
+  "maxClients": 4,
+  "externalPort": 8080
+}

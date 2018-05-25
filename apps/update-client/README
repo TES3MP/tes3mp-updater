@@ -1,0 +1,7 @@
+
+Syntax: update-client <options>
+Allowed options:
+  --help                print help message
+  --connect arg         connect to download server (e.g. --connect=127.0.0.1:25560)
+  --path arg            path to the directory with cache
+  --clean               removes unused files

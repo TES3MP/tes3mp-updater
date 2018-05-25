@@ -1,0 +1,8 @@
+This server useful for small servers that doesn't wanted to limit bandwidth usage
+
+For external HTTP servers (Apache HTTP Server recommended) use file-list-generator to generate file_list.json
+
+Syntax: update-server <options>
+Allowed options:
+  --help                print help message
+  --config arg          path to config file (e.g. --config=updater.json)
