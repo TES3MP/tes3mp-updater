@@ -57,7 +57,10 @@ int main_downloader(Options &options)
         if (entry->exists())
         {
             // todo: check if file is not fully downloaded and continue downloading
-            std::string hash = crc32File(entry->fullpath());
+            std::ifstream file(entry->fullpath(), std::ios::binary);
+            if (!file)
+                throw std::invalid_argument("Invalid file");
+            std::string hash = crc32Stream(file);
             if (hash != it.value())
             {
                 std::cout << it.key() << ": the existing file is not valid. File checksum: \""

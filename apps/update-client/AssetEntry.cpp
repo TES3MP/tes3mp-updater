@@ -3,8 +3,12 @@
 //
 
 #include "AssetEntry.hpp"
-#include <boost/filesystem.hpp>
+
 #include <iostream>
+#include <fstream>
+
+#include <boost/filesystem.hpp>
+
 #include "components/crc32.hpp"
 
 std::string AssetEntry::dataPath;
@@ -121,7 +125,10 @@ bool AssetEntry::validateFile(std::string *newHash)
     }
 
     // maybe throwing exception there isn't good idea
-    std::string _newHash = crc32File(fullpath());
+    std::ifstream file(fullpath(), std::ios::binary);
+    if (!file)
+        throw std::invalid_argument("Invalid file");
+    std::string _newHash = crc32Stream(file);
     if (_newHash != _hash)
     {
         if(newHash != nullptr)

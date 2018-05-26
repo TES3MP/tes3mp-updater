@@ -5,24 +5,20 @@
 #pragma once
 
 #include <string>
-#include <fstream>
+#include <iostream>
 #include <boost/crc.hpp>
 #include <sstream>
 
-static std::string crc32File(const std::string &f)
+static std::string crc32Stream(std::istream &dataStream)
 {
-    std::ifstream file(f, std::ios::binary);
-
     boost::crc_32_type result;
-    if (!file)
-        throw std::invalid_argument("Invalid file");
 
     do
     {
         char buffer[1024];
-        file.read(buffer, 1024);
-        result.process_bytes(buffer, file.gcount());
-    } while (file);
+        dataStream.read(buffer, 1024);
+        result.process_bytes(buffer, dataStream.gcount());
+    } while (dataStream);
 
     std::stringstream sstr;
     sstr << std::hex << result.checksum();
