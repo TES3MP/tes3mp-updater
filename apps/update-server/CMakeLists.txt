@@ -1,4 +1,12 @@
-add_executable(tes3mp_update_server main.cpp)
+add_executable(tes3mp_update_server
+        main.cpp
+        Listener.hpp
+        Session.hpp
+        Reporter.hpp
+        RequestHandler.hpp
+        Options.cpp Options.hpp
+        Utils.hpp Utils.cpp
+        )
 
 target_link_libraries(tes3mp_update_server
         ${Boost_SYSTEM_LIBRARY}
