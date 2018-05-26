@@ -38,7 +38,7 @@ bool Options::parseOptions(int argc, char **argv, Options &options)
         return false;
     }
 
-    if (variables.count("path"))
+    if (variables.count("path") == 0)
     {
         std::cerr << "the option '--path' is required but missing" << std::endl;
         return false;
