@@ -26,7 +26,10 @@ class Listener : public std::enable_shared_from_this<Listener>
     std::shared_ptr<std::string const> doc_root;
 
 public:
-    Listener(boost::asio::io_context &ioc, boost::asio::ip::tcp::endpoint endpoint, std::shared_ptr<std::string const> const &doc_root)
+    Listener(boost::asio::io_context &ioc,
+             boost::asio::ip::tcp::endpoint endpoint,
+             std::shared_ptr<std::string const> const &doc_root,
+             int backlog)
             : acceptor(ioc), _socket(ioc), doc_root(doc_root)
     {
         boost::system::error_code ec;
@@ -54,8 +57,11 @@ public:
             return;
         }
 
+        if(backlog <= 0 || backlog > boost::asio::socket_base::max_listen_connections)
+            backlog = boost::asio::socket_base::max_listen_connections;
+
         // Start listening for connections
-        acceptor.listen(boost::asio::socket_base::max_listen_connections, ec);
+        acceptor.listen(backlog, ec);
         if (ec)
         {
             fail(ec, "listen");
@@ -89,8 +95,12 @@ public:
 
     static void spawn(boost::asio::io_context &ioc,
                       const boost::asio::ip::address &address, unsigned short port,
-                      boost::beast::string_view dataRoot)
+                      boost::beast::string_view dataRoot,
+                      int maxClients)
     {
-        std::make_shared<Listener>(ioc, boost::asio::ip::tcp::endpoint{address, port}, std::make_shared<std::string>(dataRoot))->run();
+        std::make_shared<Listener>(ioc,
+                                   boost::asio::ip::tcp::endpoint{address, port},
+                                   std::make_shared<std::string>(dataRoot),
+                                   maxClients)->run();
     }
 };

@@ -40,7 +40,8 @@ int main(int argc, char **argv)
     Listener::spawn(ioc,
                     boost::asio::ip::make_address(config["address"].get<std::string>()),
                     config["externalPort"],
-                    dataPath);
+                    dataPath,
+                    config["maxClients"]);
 
     // Run the I/O service on the requested number of threads
     std::vector<std::thread> v;
