@@ -1,0 +1,2 @@
+files/data_client/server_assets/*
+!files/data_client/server_assets/use_list.json
