@@ -16,7 +16,6 @@ int main(int argc, char **argv)
         return 0;
 
     AssetEntry::setDataPath(options.downloadPath);
-    AssetEntry::setHostPath(options.address);
 
     int code = 0;
     if ((options.mode & Options::Mode::DOWNLOADER) > 0)

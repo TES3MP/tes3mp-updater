@@ -9,6 +9,7 @@
 #include <json.hpp>
 
 #include <components/crc32.hpp>
+#include <components/JSONEntry.hpp>
 #include "Options.hpp"
 #include "Helper.hpp"
 #include "Downloader.hpp"
@@ -49,38 +50,44 @@ int main_downloader(Options &options)
 
     std::vector<std::shared_ptr<AssetEntry>> downloadList;
 
-    for (auto it = file_list.begin(); it != file_list.end(); ++it)
+    for (const auto &f : JSONEntry::parse(file_list))
     {
-        auto entry = std::make_shared<AssetEntry>(it.key(), it.value());
-        bool needToDownload = false;
+        const std::string &serverAddr = f.first;
 
-        if (entry->exists())
+        for (const auto &jsonEntry : f.second)
         {
-            // todo: check if file is not fully downloaded and continue downloading
-            std::ifstream file(entry->fullpath(), std::ios::binary);
-            if (!file)
-                throw std::invalid_argument("Invalid file");
-            std::string hash = crc32Stream(file);
-            if (hash != it.value())
+            // convert json entry to asset entry
+            auto assetEntry = std::make_shared<AssetEntry>(jsonEntry);
+            bool needToDownload = false;
+
+            if (assetEntry->exists())
             {
-                std::cout << it.key() << ": the existing file is not valid. File checksum: \""
-                          << hash << "\" Valid checksum: " << it.value() << std::endl;
+                // todo: check if file is not fully downloaded and continue downloading
+                std::ifstream file(assetEntry->fullpath(), std::ios::binary);
+                if (!file)
+                    throw std::invalid_argument("Invalid file");
+                std::string hash = crc32Stream(file);
+                if (hash != jsonEntry.checksum)
+                {
+                    std::cout << jsonEntry.file << ": the existing file is not valid. File checksum: \""
+                              << hash << "\" Valid checksum: " << jsonEntry.checksum << std::endl;
+                    needToDownload = true;
+                }
+            }
+            else
+            {
+                std::cout << jsonEntry.file << ": not exists, adding to download list." << std::endl;
                 needToDownload = true;
             }
-        }
-        else
-        {
-            std::cout << it.key() << ": not exists, adding to download list." << std::endl;
-            needToDownload = true;
-        }
 
-        if (needToDownload)
-        {
-            // We need to make sure that target directory is exists before downloading
-            fs::create_directories(entry->path());
-            auto download = downloader.downloadFile(entry->downloadLink(), entry->fullpath());
-            entry->setDownloader(download);
-            downloadList.push_back(entry);
+            if (needToDownload)
+            {
+                // We need to make sure that target directory is exists before downloading
+                fs::create_directories(assetEntry->path());
+                auto download = downloader.downloadFile(assetEntry->downloadLink(), assetEntry->fullpath());
+                assetEntry->setDownloader(download);
+                downloadList.push_back(assetEntry);
+            }
         }
     }
 

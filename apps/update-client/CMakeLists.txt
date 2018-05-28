@@ -10,6 +10,7 @@ add_executable(tes3mp_update_client
         )
 
 target_link_libraries(tes3mp_update_client
+        components
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}

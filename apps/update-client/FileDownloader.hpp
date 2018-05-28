@@ -36,7 +36,6 @@ public:
      * This function asynchronously downloading data
      * @param url
      */
-
     void start(boost::beast::string_view url);
 
     static std::shared_ptr<FileDownloader> downloadToFile(boost::asio::io_service &ioservice,

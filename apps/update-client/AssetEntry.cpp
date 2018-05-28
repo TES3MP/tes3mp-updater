@@ -12,10 +12,12 @@
 #include "components/crc32.hpp"
 
 std::string AssetEntry::dataPath;
-std::string AssetEntry::hostPath;
 
-AssetEntry::AssetEntry(const std::string &path, const std::string &hash) :
-        _hash(hash), _key(path)
+AssetEntry::AssetEntry(const JSONEntry &entry, const std::string &host) :
+        AssetEntry(entry.file, entry.checksum, host, entry.fsize) {}
+
+AssetEntry::AssetEntry(const std::string &path, const std::string &hash, const std::string &host, long fsize) :
+        _hash(hash), _key(path), hostPath(host), fsize(fsize)
 {
     size_t pos = path.find_last_of('/');
     if (pos != path.npos)
@@ -58,6 +60,9 @@ bool AssetEntry::exists() const
 
 std::string AssetEntry::downloadLink() const
 {
+    if (hostPath.empty())
+        throw std::runtime_error("hostPath is empty");
+
     std::string result = hostPath + '/';
     if (!_path.empty())
         result += _path + '/';
@@ -68,11 +73,6 @@ std::string AssetEntry::downloadLink() const
 void AssetEntry::setDataPath(const std::string &str)
 {
     dataPath = str;
-}
-
-void AssetEntry::setHostPath(const std::string &str)
-{
-    hostPath = str;
 }
 
 void AssetEntry::setDownloader(const std::shared_ptr<FileDownloader> &dl)
@@ -91,7 +91,6 @@ AssetEntry::wait_status AssetEntry::wait(int sec)
     {
         switch (downloader->future()->wait_for(std::chrono::seconds(sec)))
         {
-
             case std::future_status::ready:
                 return AssetEntry::wait_status::ready;
             case std::future_status::timeout:

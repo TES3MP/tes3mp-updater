@@ -6,12 +6,16 @@
 
 #include <string>
 
+#include <components/JSONEntry.hpp>
+
 #include "FileDownloader.hpp"
 
 class AssetEntry
 {
 public:
-    AssetEntry(const std::string &path, const std::string &hash);
+    AssetEntry(const JSONEntry &entry, const std::string &host = "");
+    AssetEntry(const std::string &path, const std::string &hash, const std::string &host = "", long fsize = -1);
+
     bool exists() const;
     std::string downloadLink() const;
     std::string fullpath() const;
@@ -33,16 +37,16 @@ public:
     wait_status wait(int sec);
 
     static void setDataPath(const std::string &str);
-    static void setHostPath(const std::string &str);
 
 private:
     std::string _hash;
     std::string _key;
     std::string _path;
     std::string _filename;
+    long fsize;
 
     static std::string dataPath;
-    static std::string hostPath;
+    std::string hostPath;
 
     std::shared_ptr<FileDownloader> downloader;
 };
