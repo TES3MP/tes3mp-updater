@@ -1,5 +1,7 @@
 {
-  "Textures/face.bmp": "fe978fa5",
-  "Sound/Fx/sword.wav": "de62dc79",
-  "mygame.omwgame": "3fd2108e"
+  "127.0.0.1:8080": {
+    "Textures/face.bmp": "fe978fa5",
+    "Sound/Fx/sword.wav": "de62dc79",
+    "mygame.omwgame": "3fd2108e"
+  }
 }

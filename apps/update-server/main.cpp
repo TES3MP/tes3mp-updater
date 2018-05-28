@@ -5,11 +5,11 @@
 #include <boost/asio/io_context.hpp>
 
 #include <json.hpp>
+#include <components/JSONEntry.hpp>
 
 #include "Options.hpp"
 #include "Listener.hpp"
-
-// todo: generate file_list.json
+#include "components/FLGenerator.hpp"
 
 int main(int argc, char **argv)
 {
@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     nlohmann::json config;
 
     {
-        if(options.cfg.empty())
+        if (options.cfg.empty())
             options.cfg = "update-server.json";
         std::ifstream cfg_file(options.cfg);
         cfg_file >> config;
@@ -33,15 +33,20 @@ int main(int argc, char **argv)
     if (options.dataPath.empty())
         config["dataPath"].get<std::string>();
 
-    if(dataPath.empty())
+    if (dataPath.empty())
         throw std::runtime_error("dataPath is not present in the config neither in the running options");
 
 
-    Listener::spawn(ioc,
-                    boost::asio::ip::make_address(config["address"].get<std::string>()),
-                    config["externalPort"],
-                    dataPath,
-                    config["maxClients"]);
+    std::shared_ptr<FLGenerator> file_listGenerator = nullptr;
+
+    if (config["fileListGenerator"]["use"] == true)
+    {
+        file_listGenerator = std::make_shared<FLGenerator>(dataPath, config["fileListGenerator"]["downloadAddress"]);
+        file_listGenerator->start();
+    }
+
+    Listener::spawn(ioc, boost::asio::ip::make_address(config["address"].get<std::string>()), config["externalPort"],
+                    dataPath, config["maxClients"], file_listGenerator);
 
     // Run the I/O service on the requested number of threads
     std::vector<std::thread> v;

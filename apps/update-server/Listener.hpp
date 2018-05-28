@@ -13,10 +13,12 @@
 #include <boost/asio/bind_executor.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
+#include <boost/concept_check.hpp>
 
 #include "Reporter.hpp"
 #include "Session.hpp"
 
+class FLGenerator;
 
 // Accepts incoming connections and launches the sessions
 class Listener : public std::enable_shared_from_this<Listener>
@@ -24,13 +26,15 @@ class Listener : public std::enable_shared_from_this<Listener>
     boost::asio::ip::tcp::acceptor acceptor;
     boost::asio::ip::tcp::socket _socket;
     std::shared_ptr<std::string const> doc_root;
+    std::shared_ptr<FLGenerator> flGen;
 
 public:
     Listener(boost::asio::io_context &ioc,
              boost::asio::ip::tcp::endpoint endpoint,
              std::shared_ptr<std::string const> const &doc_root,
-             int backlog)
-            : acceptor(ioc), _socket(ioc), doc_root(doc_root)
+             int backlog,
+             const std::shared_ptr<FLGenerator> &flGen)
+            : acceptor(ioc), _socket(ioc), doc_root(doc_root), flGen(flGen)
     {
         boost::system::error_code ec;
 
@@ -87,7 +91,7 @@ public:
         if (ec)
             fail(ec, "accept");
         else // Create the Session and run it
-            std::make_shared<Session>(std::move(_socket), doc_root)->run();
+            std::make_shared<Session>(std::move(_socket), doc_root, flGen)->run();
 
         // Accept another connection
         do_accept();
@@ -96,11 +100,12 @@ public:
     static void spawn(boost::asio::io_context &ioc,
                       const boost::asio::ip::address &address, unsigned short port,
                       boost::beast::string_view dataRoot,
-                      int maxClients)
+                      int maxClients, const std::shared_ptr<FLGenerator> &flGen)
     {
         std::make_shared<Listener>(ioc,
                                    boost::asio::ip::tcp::endpoint{address, port},
                                    std::make_shared<std::string>(dataRoot),
-                                   maxClients)->run();
+                                   maxClients,
+                                   flGen)->run();
     }
 };

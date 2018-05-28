@@ -10,6 +10,7 @@
 #include <boost/beast/version.hpp>
 #include <boost/beast/http.hpp>
 #include <iostream>
+#include <components/FLGenerator.hpp>
 #include "Utils.hpp"
 
 // This function produces an HTTP response for the given request. The type of the response object depends on the
@@ -17,7 +18,8 @@
 template<class Body, class Allocator, class Send>
 void handle_request(boost::beast::string_view doc_root,
                     boost::beast::http::request<Body, boost::beast::http::basic_fields<Allocator>> &&req,
-                    Send &&send)
+                    Send &&send,
+                    const std::shared_ptr<FLGenerator> &flGen)
 {
 
     auto const response_msg = [&req] (boost::beast::string_view message, boost::beast::http::status status = boost::beast::http::status::ok) {
@@ -61,6 +63,12 @@ void handle_request(boost::beast::string_view doc_root,
     {
         //path.append("index.html");
         return send(response_msg("<h1>Welcome to the tes3mp update server</h1>"));
+    }
+
+    if (req.target() == "/file_list.json")
+    {
+        if (flGen != nullptr)
+            return send(response_msg(flGen->getJSON().dump()));
     }
 
     // Attempt to open the file

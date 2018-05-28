@@ -16,6 +16,7 @@
 #include "Reporter.hpp"
 #include "RequestHandler.hpp"
 
+class FLGenerator;
 // Handles an HTTP server connection
 class Session : public std::enable_shared_from_this<Session>
 {
@@ -54,10 +55,13 @@ class Session : public std::enable_shared_from_this<Session>
     boost::beast::http::request<boost::beast::http::string_body> req;
     std::shared_ptr<void> res;
     send_lambda lambda;
+    std::shared_ptr<FLGenerator> flGen;
 
 public:
-    explicit Session(boost::asio::ip::tcp::socket socket, std::shared_ptr<std::string const> const &doc_root)
-            : _socket(std::move(socket)), strand(_socket.get_executor()), doc_root(doc_root), lambda(*this) {}
+    explicit Session(boost::asio::ip::tcp::socket socket,
+                     std::shared_ptr<std::string const> const &doc_root,
+                     const std::shared_ptr<FLGenerator> &flGen)
+            : _socket(std::move(socket)), strand(_socket.get_executor()), doc_root(doc_root), lambda(*this), flGen(flGen) {}
 
     // Start the asynchronous operation
     void run()
@@ -89,7 +93,7 @@ public:
             return fail(ec, "read");
 
         // Send the response
-        handle_request(*doc_root, std::move(req), lambda);
+        handle_request(*doc_root, std::move(req), lambda, flGen);
     }
 
     void on_write(boost::system::error_code ec, std::size_t bytes_transferred, bool close)
