@@ -10,7 +10,7 @@ struct Options
 {
     std::string address;
     std::string downloadPath;
-    std::string useListPath;
+    std::string cachePath;
     std::string useServer;
     enum Mode {
         DOWNLOADER = 0x1,

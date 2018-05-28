@@ -79,15 +79,15 @@ void removeEmptyDirs(const fs::path &path)
 
 int main_cleaner(Options &options)
 {
-    nlohmann::json use_list;
-    Helper::loadJson(use_list, options.useListPath);
+    nlohmann::json cache;
+    Helper::loadJson(cache, options.cachePath);
 
-    Helper::deleteOldServers(use_list, options.timestamp);
-    Helper::saveJson(use_list, options.useListPath);
+    Helper::deleteOldServers(cache, options.timestamp);
+    Helper::saveJson(cache, options.cachePath);
 
     fs::path path(options.downloadPath);
     std::set<fs::path> pathes = getFiles(path);
-    pathes.erase(options.useListPath); // remove use_list.json from the list
+    pathes.erase(options.cachePath); // remove cache.json from the list
 
     for (const auto &entry : pathes)
     {
@@ -95,7 +95,7 @@ int main_cleaner(Options &options)
         std::string hash = entry.parent_path().filename().string();
         std::string path = fs::relative(entry.parent_path().parent_path(), options.downloadPath).string();
 
-        if (Helper::deleteUnusedFile(use_list, path, hash))
+        if (Helper::deleteUnusedFile(cache, path, hash))
             std::cout << "unused file: " << path << " with hash \"" << hash << "\" deleted" << std::endl;
     }
 

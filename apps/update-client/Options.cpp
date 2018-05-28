@@ -56,7 +56,7 @@ bool Options::parseOptions(int argc, char **argv, Options &options)
     }
 
     options.downloadPath = variables["path"].as<std::string>();
-    options.useListPath = options.downloadPath + "/use_list.json";
+    options.cachePath = options.downloadPath + "/cache.json";
 
     options.mode = 0;
 

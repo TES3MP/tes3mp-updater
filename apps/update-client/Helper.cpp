@@ -9,10 +9,10 @@
 
 namespace fs = boost::filesystem;
 
-// todo: check the use_list so that it doesn't contain ".." to avoid deleting invalid files (attack on the system)
-bool Helper::deleteUnusedFile(const nlohmann::json &use_list, const std::string &path, const std::string &hash)
+// todo: check the cache so that it doesn't contain ".." to avoid deleting invalid files (attack on the system)
+bool Helper::deleteUnusedFile(const nlohmann::json &cache, const std::string &path, const std::string &hash)
 {
-    for (const auto &serv : use_list)
+    for (const auto &serv : cache)
     {
         auto foundIt = serv.find(path);
         if (foundIt != serv.end() && foundIt.value() == hash)
@@ -23,14 +23,14 @@ bool Helper::deleteUnusedFile(const nlohmann::json &use_list, const std::string 
     return fs::remove_all(entry.path()) > 0;
 }
 
-bool Helper::deleteOldServers(nlohmann::json &use_list, long stamp)
+bool Helper::deleteOldServers(nlohmann::json &cache, long stamp)
 {
     bool result = false;
-    for (nlohmann::json::iterator it = use_list.begin(); it != use_list.end();)
+    for (nlohmann::json::iterator it = cache.begin(); it != cache.end();)
     {
-        if (it.value()[USE_LIST_KEY_TIMESTAMP] < stamp)
+        if (it.value()[CACHE_KEY_TIMESTAMP] < stamp)
         {
-            it = use_list.erase(it);
+            it = cache.erase(it);
             result = true;
         }
         else
@@ -39,15 +39,15 @@ bool Helper::deleteOldServers(nlohmann::json &use_list, long stamp)
     return result;
 }
 
-void Helper::saveJson(const nlohmann::json &use_list, const std::string &file)
+void Helper::saveJson(const nlohmann::json &cache, const std::string &file)
 {
-    std::ofstream use_list_file(file);
-    use_list_file << std::setw(4) << use_list;
-    use_list_file.close();
+    std::ofstream cache_file(file);
+    cache_file << std::setw(4) << cache;
+    cache_file.close();
 }
 
-void Helper::loadJson(nlohmann::json &use_list, const std::string &file)
+void Helper::loadJson(nlohmann::json &cache, const std::string &file)
 {
-    std::ifstream use_list_file(file);
-    use_list_file >> use_list;
+    std::ifstream cache_file(file);
+    cache_file >> cache;
 }

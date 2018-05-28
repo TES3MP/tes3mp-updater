@@ -20,10 +20,10 @@ namespace fs = boost::filesystem;
 
 int main_downloader(Options &options)
 {
-    nlohmann::json use_list;
-    Helper::loadJson(use_list, options.useListPath);
+    nlohmann::json cache;
+    Helper::loadJson(cache, options.cachePath);
 
-    nlohmann::json &use_server = use_list[options.useServer];
+    nlohmann::json &use_server = cache[options.useServer];
 
     Downloader downloader;
 
@@ -34,19 +34,19 @@ int main_downloader(Options &options)
 
     for (nlohmann::json::iterator it = use_server.begin(); it != use_server.end(); ++it)
     {
-        if (it.key()[0] != USE_LIST_KEY_PREFIX_SERIVCE) // skip service data
+        if (it.key()[0] != CACHE_KEY_PREFIX_SERIVCE) // skip service data
             continue;
         auto foundIt = file_list.find(it.key());
         if (foundIt != file_list.end() && foundIt.value() != it.value()) // stored file and file on the server are different
         {
-            // remove file from the use_list
+            // remove file from the cache
             use_server.erase(it.key());
-            Helper::deleteUnusedFile(use_list, it.key(), it.value());
+            Helper::deleteUnusedFile(cache, it.key(), it.value());
         }
     }
 
-    // because downloader can throw exceptions we need to save use_list
-    Helper::saveJson(use_list, options.useListPath);
+    // because downloader can throw exceptions we need to save cache
+    Helper::saveJson(cache, options.cachePath);
 
     std::vector<std::shared_ptr<AssetEntry>> downloadList;
 
@@ -119,7 +119,7 @@ int main_downloader(Options &options)
         else
         {
             fs::remove_all(v->path());
-            Helper::saveJson(use_list, options.useListPath);
+            Helper::saveJson(cache, options.cachePath);
             if (!newHash.empty())
                 throw std::runtime_error("Downloaded file invalid. File checksum: \""
                                          + newHash + "\" Valid checksum: " + v->hash());
@@ -131,8 +131,8 @@ int main_downloader(Options &options)
         fileIt = downloadList.erase(fileIt);
     }
 
-    use_server[USE_LIST_KEY_TIMESTAMP] = TimeUtil::timestamp();
-    Helper::saveJson(use_list, options.useListPath);
+    use_server[CACHE_KEY_TIMESTAMP] = TimeUtil::timestamp();
+    Helper::saveJson(cache, options.cachePath);
 
     return 0;
 }
