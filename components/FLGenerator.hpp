@@ -22,11 +22,14 @@ public:
     FLGenerator(const std::string &dataPath, const std::string &defaultServer);
     ~FLGenerator();
 
+    void start();
+
     nlohmann::json getJSON();
 
 private:
     void doRun();
     JSONEntry doFile(const std::string &path);
+    std::future<void> getJSON_internal();
 
     // Start thread
     void runThread();
@@ -39,6 +42,8 @@ private:
 
     std::thread thread;
     std::atomic_bool threadFinished;
+    std::shared_future<void> future;
+    nlohmann::json file_list;
 };
 
 

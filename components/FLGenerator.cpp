@@ -17,8 +17,16 @@ FLGenerator::FLGenerator(const std::string &dataPath, const std::string &default
 
 FLGenerator::~FLGenerator()
 {
-    /*if (thread.joinable())
-        thread.join();*/
+}
+
+void FLGenerator::start()
+{
+    runThread();
+
+    if (!waitThread())
+        throw std::runtime_error("Internal error");
+
+    future = getJSON_internal();
 }
 
 JSONEntry FLGenerator::doFile(const std::string &path)
@@ -78,43 +86,51 @@ bool FLGenerator::waitThread()
 
 nlohmann::json FLGenerator::getJSON()
 {
-    runThread();
-
-    if (!waitThread())
-        throw std::runtime_error("Internal error");
-
-    JSONEntries vec = entries.begin()->second;
-    JSONEntries::iterator it = vec.begin();
-
-    nlohmann::json obj;
-    auto &entry = obj[entries.begin()->first];
-
-    while (!vec.empty())
+    try
     {
-        const std::shared_ptr<FutureEntry> &en = *it;
-
-        if (en->wait_for(std::chrono::milliseconds(500)) == std::future_status::timeout)
-        {
-            if (std::next(it) == vec.end())
-                it = vec.begin();
-            else
-                ++it;
-            continue;
-        }
-
-        JSONEntry val = en->get();
-
-        nlohmann::json e;
-        e["file"] = val.file;
-        e["fsize"] = val.fsize;
-        e["checksum"] = val.checksum;
-        entry.push_back(e);
-
-        it = vec.erase(it);
-
-        if (it == vec.end())
-            it = vec.begin();
+        // wait when getJSON_internal finishes
+        future.get();
     }
+    catch (std::future_error &e)
+    {
+        throw std::runtime_error("FLGenerator doesn't started.");
+    }
+    return file_list;
+}
 
-    return obj;
+std::future<void> FLGenerator::getJSON_internal()
+{
+    return std::async([](const std::shared_ptr<FLGenerator> &self) {
+        JSONEntries vec = self->entries.begin()->second;
+        JSONEntries::iterator it = vec.begin();
+
+        auto &entry = self->file_list[self->entries.begin()->first];
+
+        while (!vec.empty())
+        {
+            const std::shared_ptr<FutureEntry> &en = *it;
+
+            if (en->wait_for(std::chrono::milliseconds(500)) == std::future_status::timeout)
+            {
+                if (std::next(it) == vec.end())
+                    it = vec.begin();
+                else
+                    ++it;
+                continue;
+            }
+
+            JSONEntry val = en->get();
+
+            nlohmann::json e;
+            e["file"] = val.file;
+            e["fsize"] = val.fsize;
+            e["checksum"] = val.checksum;
+            entry.push_back(e);
+
+            it = vec.erase(it);
+
+            if (it == vec.end())
+                it = vec.begin();
+        }
+    }, shared_from_this());
 }
