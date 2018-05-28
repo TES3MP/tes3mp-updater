@@ -33,6 +33,9 @@ std::set<fs::path> getFiles(const fs::path &path)
 
 void removeEmptyDirs(const fs::path &path)
 {
+    if (!fs::is_directory(path))
+        return;
+
     fs::directory_iterator it(path);
     std::stack<fs::directory_iterator> itStack;
     fs::directory_iterator end;
@@ -49,7 +52,7 @@ void removeEmptyDirs(const fs::path &path)
         it = fs::directory_iterator(*it);
     };
 
-    do
+    while (it != end)
     {
         if (!fs::is_directory(*it))
         {
@@ -71,7 +74,7 @@ void removeEmptyDirs(const fs::path &path)
             popDir();
             continue;
         }
-    } while (it != end);
+    }
 }
 
 int main_cleaner(Options &options)
