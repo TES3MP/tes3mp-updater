@@ -9,14 +9,10 @@
 #include <vector>
 #include <unordered_map>
 #include <future>
+
 #include <json.hpp>
 
-struct JSONEntry
-{
-    std::string file;
-    std::string checksum;
-    long fsize;
-};
+#include "JSONEntry.hpp"
 
 class FLGenerator: public std::enable_shared_from_this<FLGenerator>
 {

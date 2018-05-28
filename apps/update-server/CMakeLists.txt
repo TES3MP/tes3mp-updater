@@ -6,9 +6,10 @@ add_executable(tes3mp_update_server
         RequestHandler.hpp
         Options.cpp Options.hpp
         Utils.hpp Utils.cpp
-        FLGenerator.cpp FLGenerator.hpp)
+        )
 
 target_link_libraries(tes3mp_update_server
+        components
         ${Boost_SYSTEM_LIBRARY}
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_PROGRAM_OPTIONS_LIBRARY}

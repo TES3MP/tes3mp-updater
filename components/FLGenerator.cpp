@@ -105,9 +105,10 @@ nlohmann::json FLGenerator::getJSON()
         JSONEntry val = en->get();
 
         nlohmann::json e;
+        e["file"] = val.file;
         e["fsize"] = val.fsize;
         e["checksum"] = val.checksum;
-        entry[val.file] = e;
+        entry.push_back(e);
 
         it = vec.erase(it);
 

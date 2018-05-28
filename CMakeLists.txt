@@ -24,5 +24,6 @@ include_directories("."
 
 link_directories(${Boost_LIBRARY_DIRS})
 
+add_subdirectory(components)
 add_subdirectory(apps/update-server)
 add_subdirectory(apps/update-client)
